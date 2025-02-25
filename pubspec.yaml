@@ -1,6 +1,6 @@
 name: flutter_urovo_scan
 description: "A Flutter plugin for Urovo scanner integration"
-version: 0.0.1
+version: 0.0.2
 repository: https://github.com/snave00/flutter_urovo_scan
 
 environment:
