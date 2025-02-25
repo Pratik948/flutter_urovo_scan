@@ -20,7 +20,12 @@ class ScannerManagerHelper(private val context: Context, private val plugin: Flu
     fun getScannerState(result: MethodChannel.Result) {
         try {
             val powerOn = mScanManager.scannerState
-            result.success(powerOn)
+            if (powerOn) {
+                result.success("ACTIVE")
+            } else {
+                result.success("INACTIVE")
+            }
+
         } catch (e: Exception) {
             result.error("ERROR", "getScannerState Error Occurred: ${e.toString()}", null)
         }
@@ -28,18 +33,17 @@ class ScannerManagerHelper(private val context: Context, private val plugin: Flu
 
     fun openScanner(result: MethodChannel.Result) {
         try {
-            // mScanManager = ScanManager()
             val powerOn = mScanManager.scannerState
             if (!powerOn) {
                 val ret: Boolean = mScanManager.openScanner()
                 if (ret) {
-                    //open successful
-                    result.success(ret)
+                    // open successful
+                    result.success("ON")
                 } else {
-                    result.error("UNAVAILABLE", "Open Scanner failed", null)
+                    result.success("Open Scanner failed")
                 }
             } else {
-                result.error("UNAVAILABLE", "Scanner already ON", null)
+                result.success("Scanner already ON")
             }
 
         } catch (e: Exception) {
@@ -49,25 +53,14 @@ class ScannerManagerHelper(private val context: Context, private val plugin: Flu
 
     fun closeScanner(result: MethodChannel.Result) {
         try {
-            // mScanManager = ScanManager()
             val powerOn = mScanManager.scannerState
             if (powerOn) {
                 val ret: Boolean = mScanManager.closeScanner()
-                print("RESULT CLOSE: $ret");
-                // close successful
-                // weird. it always returns false but it successfully turn off na scanner.
-                result.success(ret)
-                // if (ret) {
-
-                // } else {
-                //    result.error("UNAVAILABLE", "Close Scanner failed", null)
-                // }
-
+                // close successful -> returns false if turned off successfully
+                result.success("OFF")
             } else {
-                result.error("UNAVAILABLE", "Scanner already OFF", null)
+                result.success("Scanner already OFF")
             }
-
-
         } catch (e: Exception) {
             result.error("ERROR", "Close Scanner Error Occurred: ${e.toString()}", null)
         }
@@ -76,13 +69,10 @@ class ScannerManagerHelper(private val context: Context, private val plugin: Flu
     fun getOutputMode(result: MethodChannel.Result) {
         try {
             val mode = mScanManager.outputMode
-            if (mode == 0) {
-                // barcode is sent as intent
-                result.success("Barcode is sent as intent")
-            } else if (mode == 1) {
-                // barcode is sent to the text box in focus
-                result.success("Barcode is sent to the text box in focus")
-            }
+
+            // 0 - barcode is sent as intent
+            // 1 - barcode is sent to the text box in focus (default)
+            result.success(mode)
         } catch (e: Exception) {
             result.error("ERROR", "Get Output mode Error Occurred: ${e.toString()}", null)
         }
@@ -95,7 +85,14 @@ class ScannerManagerHelper(private val context: Context, private val plugin: Flu
             // 1 - barcode is sent to the text box in focus (default)
             val ret = mScanManager.switchOutputMode(mode)
             if (ret) {
-                result.success("Output Mode was set to: $mode")
+                if (mode == 0) {
+                    result.success("Output Mode was set as Intent - $mode")
+                } else   if (mode == 1) {
+                    result.success("Output Mode was set to TextBox in Focus - $mode")
+                } else {
+                    result.success("Output Mode was set to Unknown - $mode")
+                }
+
             }
         } catch (e: Exception) {
             result.error("ERROR", "Set Output mode Error Occurred: ${e.toString()}", null)

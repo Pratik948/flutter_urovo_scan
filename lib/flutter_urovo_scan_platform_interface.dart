@@ -26,4 +26,48 @@ abstract class FlutterUrovoScanPlatform extends PlatformInterface {
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
+
+  Future<String?> getBatteryLevel() {
+    throw UnimplementedError('getBatteryLevel() has not been implemented.');
+  }
+
+  Future<String?> getScannerState() {
+    throw UnimplementedError('getScannerState() has not been implemented.');
+  }
+
+  Future<String?> openScanner() {
+    throw UnimplementedError('openScanner() has not been implemented.');
+  }
+
+  Future<String?> closeScanner() {
+    throw UnimplementedError('closeScanner() has not been implemented.');
+  }
+
+  Future<int?> getOutputMode() {
+    throw UnimplementedError('getOutputMode() has not been implemented.');
+  }
+
+  Future<String?> setOutputMode(int outputMode) {
+    throw UnimplementedError('setOutputMode() has not been implemented.');
+  }
+
+  Future<String?> getTriggerMode() {
+    throw UnimplementedError('getTriggerMode() has not been implemented.');
+  }
+
+  Future<String?> setTriggerMode(String mode) {
+    throw UnimplementedError('setTriggerMode() has not been implemented.');
+  }
+
+  Future<String?> getParamsInts() {
+    throw UnimplementedError('getParamsInts() has not been implemented.');
+  }
+
+  Future<String?> startDecode() {
+    throw UnimplementedError('startDecode() has not been implemented.');
+  }
+
+  Future<String?> stopDecode() {
+    throw UnimplementedError('stopDecode() has not been implemented.');
+  }
 }

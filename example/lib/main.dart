@@ -3,7 +3,6 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_urovo_scan/flutter_urovo_scan.dart';
-import 'package:flutter_urovo_scan_example/scanner_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,29 +18,26 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   final _flutterUrovoScanPlugin = FlutterUrovoScan();
+  String scannerState = '';
+  String scanResult = 'Waiting for result...';
+  int selectedOutputMode = 1;
 
-  static const eventChannel = EventChannel("flutter_urovo_scan_plugin/scan");
-  String scanResult = "Waiting for scan...";
+  List<int> outModeOptions = [
+    0, // Intent
+    1, // Textbox focus
+  ];
 
   @override
   void initState() {
     super.initState();
     initPlatformState();
-    debugPrint('[TEST]:Wew');
 
-    // ScannerService.startListening();
-    // ScannerService.scanStream.listen((event) {
-    //   debugPrint('[TEST][DEBUG] Scan Event: $event');
-    // });
+    _getScannerState();
 
-    eventChannel.receiveBroadcastStream().listen((result) {
-      setState(() {
-        scanResult = result;
-        debugPrint("[TEST] scanResult Pre!!!: $scanResult");
-      });
-    }, onError: (error) {
-      debugPrint("[TEST] Error: $error");
-    });
+    // Listen to Urovo Scanner
+    _startListening();
+
+    _getOutputMode();
   }
 
   @override
@@ -71,6 +67,32 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> _startListening() async {
+    ScannerListener.startListening();
+    ScannerListener.scanStream.listen(
+      (event) {
+        setState(() {
+          debugPrint('[TEST] startListening 2 $event');
+          scanResult = event;
+        });
+      },
+    );
+  }
+
+  Future<void> _getScannerState() async {
+    final result = await _flutterUrovoScanPlugin.getScannerState();
+    setState(() {
+      scannerState = result ?? '';
+    });
+  }
+
+  Future<void> _getOutputMode() async {
+    final result = await _flutterUrovoScanPlugin.getOutputMode();
+    setState(() {
+      selectedOutputMode = result ?? 1;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -78,17 +100,87 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Column(children: [
-            Text('Running on: $_platformVersion\n'),
-            ElevatedButton(
-              onPressed: () async {
-                await ScannerService.openScannerFromNative();
-              },
-              child: Text("Open Scanner"),
+        body: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text('Running on: $_platformVersion\n'),
+                Text('Scanner State: $scannerState'),
+                const SizedBox(height: 16),
+
+                // Open Scanner
+                ElevatedButton(
+                  onPressed: () async {
+                    final result = await _flutterUrovoScanPlugin.openScanner();
+                    setState(() {
+                      scannerState = result ?? '';
+                    });
+                  },
+                  child: const Text('Open Scanner'),
+                ),
+                const SizedBox(height: 16),
+
+                // Close Scanner
+                ElevatedButton(
+                  onPressed: () async {
+                    final result = await _flutterUrovoScanPlugin.closeScanner();
+                    setState(() {
+                      scannerState = result ?? '';
+                    });
+                  },
+                  child: const Text('Close Scanner'),
+                ),
+                const SizedBox(height: 16),
+
+                SegmentedButton(
+                  multiSelectionEnabled: false,
+                  segments: const [
+                    ButtonSegment(
+                      value: 0,
+                      label: Text('Intent'),
+                    ),
+                    ButtonSegment(
+                      value: 1,
+                      label: Text('Textbox focus'),
+                    ),
+                  ],
+                  selected: {selectedOutputMode}, // Current selected value
+                  onSelectionChanged: (newSelection) async {
+                    setState(() {
+                      selectedOutputMode = newSelection.first;
+                    });
+                    await _flutterUrovoScanPlugin
+                        .setOutputMode(selectedOutputMode);
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Scanner Result
+                const Text('Scanner Result'),
+
+                // Scanner Result Intent
+                if (selectedOutputMode == 0)
+                  Text(
+                    scanResult,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                // Scanner Result Textbox
+                if (selectedOutputMode == 1)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: TextField(
+                      autofocus: true,
+                    ),
+                  ),
+              ],
             ),
-            Text('Scanned: $scanResult'),
-          ]),
+          ),
         ),
       ),
     );
