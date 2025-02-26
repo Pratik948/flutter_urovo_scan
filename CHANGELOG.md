@@ -1,3 +1,3 @@
-## 0.0.2
+## 0.0.3
 
-* Converted Urovo kotlin functions into dart functions
+* Added safety try catch & code cleanup
