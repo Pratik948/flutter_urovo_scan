@@ -176,9 +176,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   bool _isScannerActive() {
-    if (scannerState == 'ACTIVE' ||
-        scannerState == 'ON' ||
-        scannerState == 'Scanner already ON') {
+    if (scannerState == 'ACTIVE') {
       return true;
     }
 

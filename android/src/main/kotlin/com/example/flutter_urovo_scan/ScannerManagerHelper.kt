@@ -12,6 +12,8 @@ import io.flutter.plugin.common.MethodChannel
 class ScannerManagerHelper(private val context: Context, private val plugin: FlutterUrovoScanPlugin?) {
     private val mScanManager: ScanManager = ScanManager()
     private val scannerUrovoReceiver = ScannerUrovoReceiver(plugin)
+    private val activeState = "ACTIVE"
+    private val inactiveState = "INACTIVE"
 
     fun getScannerInstance(): ScanManager {
         return mScanManager
@@ -21,9 +23,9 @@ class ScannerManagerHelper(private val context: Context, private val plugin: Flu
         try {
             val powerOn = mScanManager.scannerState
             if (powerOn) {
-                result.success("ACTIVE")
+                result.success(activeState)
             } else {
-                result.success("INACTIVE")
+                result.success(inactiveState)
             }
 
         } catch (e: Exception) {
@@ -38,12 +40,13 @@ class ScannerManagerHelper(private val context: Context, private val plugin: Flu
                 val ret: Boolean = mScanManager.openScanner()
                 if (ret) {
                     // open successful
-                    result.success("ON")
+                    result.success(activeState)
                 } else {
                     result.success("Open Scanner failed")
                 }
             } else {
-                result.success("Scanner already ON")
+                // Scanner already ACTIVE
+                result.success(activeState)
             }
 
         } catch (e: Exception) {
@@ -56,10 +59,15 @@ class ScannerManagerHelper(private val context: Context, private val plugin: Flu
             val powerOn = mScanManager.scannerState
             if (powerOn) {
                 val ret: Boolean = mScanManager.closeScanner()
-                // close successful -> returns false if turned off successfully
-                result.success("OFF")
+                if (!ret) {
+                    // close successful -> returns false if turned off successfully
+                    result.success(inactiveState)
+                } else {
+                    result.success("Open Scanner failed")
+                }
             } else {
-                result.success("Scanner already OFF")
+                // Scanner already INACTIVE
+                result.success(inactiveState)
             }
         } catch (e: Exception) {
             result.error("ERROR", "Close Scanner Error Occurred: ${e.toString()}", null)
@@ -85,12 +93,16 @@ class ScannerManagerHelper(private val context: Context, private val plugin: Flu
             // 1 - barcode is sent to the text box in focus (default)
             val ret = mScanManager.switchOutputMode(mode)
             if (ret) {
-                if (mode == 0) {
-                    result.success("Output Mode was set as Intent - $mode")
-                } else   if (mode == 1) {
-                    result.success("Output Mode was set to TextBox in Focus - $mode")
-                } else {
-                    result.success("Output Mode was set to Unknown - $mode")
+                when (mode) {
+                    0 -> {
+                        result.success("Output Mode was set as Intent - $mode")
+                    }
+                    1 -> {
+                        result.success("Output Mode was set to TextBox in Focus - $mode")
+                    }
+                    else -> {
+                        result.success("Output Mode was set to Unknown - $mode")
+                    }
                 }
 
             }
