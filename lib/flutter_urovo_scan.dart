@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -64,13 +65,21 @@ class ScannerListener {
   static Stream<String> get scanStream => _controller.stream;
 
   static void startListening() {
-    eventChannel.receiveBroadcastStream().listen(
-      (event) {
-        _controller.add(event.toString());
-      },
-      onError: (error) {
-        debugPrint('[TEST] startListening Error : $error');
-      },
-    );
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
+
+    try {
+      eventChannel.receiveBroadcastStream().listen(
+        (event) {
+          _controller.add(event.toString());
+        },
+        onError: (error) {
+          debugPrint('[TEST] startListening Error : $error');
+        },
+      );
+    } catch (e) {
+      throw Exception('[EventChannelError] ${e.toString()}');
+    }
   }
 }

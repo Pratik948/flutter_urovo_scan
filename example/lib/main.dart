@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_urovo_scan/flutter_urovo_scan.dart';
 
 void main() {
@@ -16,12 +15,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
   final _flutterUrovoScanPlugin = FlutterUrovoScan();
+  StreamSubscription? streamSubscription;
   String scannerState = '';
   String scanResult = 'Waiting for result...';
   int selectedOutputMode = 1;
-
   List<int> outModeOptions = [
     0, // Intent
     1, // Textbox focus
@@ -30,53 +28,16 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
 
     _getScannerState();
-
-    // Listen to Urovo Scanner
-    _startListening();
-
     _getOutputMode();
+    _startListening();
   }
 
   @override
   void dispose() {
     super.dispose();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion = await _flutterUrovoScanPlugin.getPlatformVersion() ??
-          'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
-  }
-
-  Future<void> _startListening() async {
-    ScannerListener.startListening();
-    ScannerListener.scanStream.listen(
-      (event) {
-        setState(() {
-          debugPrint('[TEST] startListening 2 $event');
-          scanResult = event;
-        });
-      },
-    );
+    streamSubscription?.cancel();
   }
 
   Future<void> _getScannerState() async {
@@ -93,6 +54,18 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> _startListening() async {
+    ScannerListener.startListening();
+    streamSubscription = ScannerListener.scanStream.listen(
+      (event) {
+        setState(() {
+          debugPrint('[TEST] startListening $event');
+          scanResult = event;
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -105,8 +78,24 @@ class _MyAppState extends State<MyApp> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text('Running on: $_platformVersion\n'),
-                Text('Scanner State: $scannerState'),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Scanner State: ',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    Text(
+                      scannerState,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: _isScannerActive() ? Colors.green : Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
 
                 // Open Scanner
@@ -184,5 +173,15 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  bool _isScannerActive() {
+    if (scannerState == 'ACTIVE' ||
+        scannerState == 'ON' ||
+        scannerState == 'Scanner already ON') {
+      return true;
+    }
+
+    return false;
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -18,70 +20,160 @@ class MethodChannelFlutterUrovoScan extends FlutterUrovoScanPlatform {
 
   @override
   Future<String?> getBatteryLevel() async {
-    final result = await methodChannel.invokeMethod<String>('getBatteryLevel');
-    return result;
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
+
+    try {
+      final result =
+          await methodChannel.invokeMethod<String>('getBatteryLevel');
+      return result;
+    } catch (e) {
+      throw Exception('[MethodChannelError] ${e.toString()}');
+    }
   }
 
   @override
   Future<String?> getScannerState() async {
-    final result = await methodChannel.invokeMethod<String>('getScannerState');
-    return result;
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
+
+    try {
+      final result =
+          await methodChannel.invokeMethod<String>('getScannerState');
+      return result;
+    } catch (e) {
+      throw Exception('[MethodChannelError] ${e.toString()}');
+    }
   }
 
   @override
   Future<String?> openScanner() async {
-    final result = await methodChannel.invokeMethod<String>('openScanner');
-    return result;
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
+
+    try {
+      final result = await methodChannel.invokeMethod<String>('openScanner');
+      return result;
+    } catch (e) {
+      throw Exception('[MethodChannelError] ${e.toString()}');
+    }
   }
 
   @override
   Future<String?> closeScanner() async {
-    final result = await methodChannel.invokeMethod<String>('closeScanner');
-    return result;
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
+
+    try {
+      final result = await methodChannel.invokeMethod<String>('closeScanner');
+      return result;
+    } catch (e) {
+      throw Exception('[MethodChannelError] ${e.toString()}');
+    }
   }
 
   @override
   Future<int?> getOutputMode() async {
-    final result = await methodChannel.invokeMethod<int>('getOutputMode');
-    return result;
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
+
+    try {
+      final result = await methodChannel.invokeMethod<int>('getOutputMode');
+      return result;
+    } catch (e) {
+      throw Exception('[MethodChannelError] ${e.toString()}');
+    }
   }
 
   @override
   Future<String?> setOutputMode(int outputMode) async {
-    final result = await methodChannel
-        .invokeMethod<String>('setOutputMode', {"output_mode": outputMode});
-    return result;
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
+
+    try {
+      final result = await methodChannel
+          .invokeMethod<String>('setOutputMode', {"output_mode": outputMode});
+      return result;
+    } catch (e) {
+      throw Exception('[MethodChannelError] ${e.toString()}');
+    }
   }
 
   @override
   Future<String?> getTriggerMode() async {
-    final result = await methodChannel.invokeMethod<String>('getTriggerMode');
-    return result;
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
+
+    try {
+      final result = await methodChannel.invokeMethod<String>('getTriggerMode');
+      return result;
+    } catch (e) {
+      throw Exception('[MethodChannelError] ${e.toString()}');
+    }
   }
 
   @override
   Future<String?> setTriggerMode(String mode) async {
-    final result = await methodChannel
-        .invokeMethod<String>('setTriggerMode', {"mode": mode.toUpperCase()});
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
 
-    return result;
+    try {
+      final result = await methodChannel
+          .invokeMethod<String>('setTriggerMode', {"mode": mode.toUpperCase()});
+
+      return result;
+    } catch (e) {
+      throw Exception('[MethodChannelError] ${e.toString()}');
+    }
   }
 
   @override
   Future<String?> getParamsInts() async {
-    final result = await methodChannel.invokeMethod<String>('getParamsInts');
-    return result;
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
+
+    try {
+      final result = await methodChannel.invokeMethod<String>('getParamsInts');
+      return result;
+    } catch (e) {
+      throw Exception('[MethodChannelError] ${e.toString()}');
+    }
   }
 
   @override
   Future<String?> startDecode() async {
-    final result = await methodChannel.invokeMethod<String>('startDecode');
-    return result;
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
+
+    try {
+      final result = await methodChannel.invokeMethod<String>('startDecode');
+      return result;
+    } catch (e) {
+      throw Exception('[MethodChannelError] ${e.toString()}');
+    }
   }
 
   @override
   Future<String?> stopDecode() async {
-    final result = await methodChannel.invokeMethod<String>('stopDecode');
-    return result;
+    if (!Platform.isAndroid) {
+      throw Exception('Available only for Android');
+    }
+
+    try {
+      final result = await methodChannel.invokeMethod<String>('stopDecode');
+      return result;
+    } catch (e) {
+      throw Exception('[MethodChannelError] ${e.toString()}');
+    }
   }
 }
