@@ -1,6 +1,6 @@
 name: flutter_urovo_scan
-description: "A Flutter plugin for integrating Urovo barcode scanners with Android devices. This plugin provides a way to interact with Urovo’s built-in scanning hardware, allowing you to capture barcode data in your Flutter app."
-version: 0.0.3
+description: "A Flutter plugin for integrating Urovo barcode scanners with Android devices. This plugin provides a way to interact with Urovo’s built-in scanning hardware."
+version: 0.0.4
 repository: https://github.com/snave00/flutter_urovo_scan
 
 environment:
