@@ -1,3 +1,3 @@
-## 0.0.4
+## 0.0.5
 
-* Added documentation
+* Fixed: “Urovo Scanner does not work in release mode; it only works in debug mode.”
