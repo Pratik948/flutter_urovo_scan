@@ -21,6 +21,7 @@
 -keep class * extends android.device.ScanManager { *; }
 -dontwarn android.device.**
 -keep class libs.platform_sdk_v4.1.0326.** { *; }
+-keep class libs.platform_sdk_v4.2.0618.** { *; }
 
 # Keep all native methods
 -keepclasseswithmembernames class * {
