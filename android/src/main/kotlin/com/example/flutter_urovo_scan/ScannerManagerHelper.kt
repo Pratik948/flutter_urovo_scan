@@ -3,6 +3,7 @@ package com.example.flutter_urovo_scan
 import android.content.Context
 import android.content.IntentFilter
 import android.device.ScanManager
+import android.os.Build
 import android.device.scanner.configuration.PropertyID
 import android.device.scanner.configuration.Triggering
 import android.util.Log
@@ -14,6 +15,22 @@ class ScannerManagerHelper(private val context: Context, private val plugin: Flu
     private val scannerUrovoReceiver = ScannerUrovoReceiver(plugin)
     private val activeState = "ACTIVE"
     private val inactiveState = "INACTIVE"
+    private var receiverRegistered = false
+
+    /**
+     * True only on devices where the Urovo scanner service really exists. The bundled platform SDK jar
+     * makes `android.device.ScanManager` resolvable everywhere, but on non-Urovo devices (e.g. Zebra)
+     * every call is a stub that throws `RuntimeException("stub")`.
+     */
+    val isUrovoScannerAvailable: Boolean by lazy {
+        try {
+            mScanManager.scannerState
+            true
+        } catch (e: Throwable) {
+            Log.i("FlutterUrovoScan", "Urovo scanner not available on this device: $e")
+            false
+        }
+    }
 
     fun getScannerInstance(): ScanManager {
         return mScanManager
@@ -185,28 +202,54 @@ class ScannerManagerHelper(private val context: Context, private val plugin: Flu
         }
     }
 
+    /**
+     * Registers/unregisters the scan result receiver. Safe on non-Urovo devices: does nothing there.
+     * Never throws: it runs from onAttachedToEngine/onDetachedFromEngine, where an exception
+     * would fail plugin registration or crash the host app while its activity is destroyed.
+     */
     fun registerReceiver(register: Boolean) {
-        Log.d("[TEST]", "registerReceiver 1");
-        if (register && mScanManager != null) {
-            Log.d("[TEST]", "registerReceiver 2");
-            val filter = IntentFilter()
-            val idBuf = intArrayOf(
-                PropertyID.WEDGE_INTENT_ACTION_NAME,
-                PropertyID.WEDGE_INTENT_DATA_STRING_TAG
-            )
-            val valueBuf = mScanManager.getParameterString(idBuf)
-            if (valueBuf != null && valueBuf[0] != null && valueBuf[0] != "") {
-                filter.addAction(valueBuf[0])
-            } else {
-                filter.addAction(Singleton.ACTION_DECODE)
-            }
-            filter.addAction(Singleton.ACTION_CAPTURE_IMAGE)
+        if (!isUrovoScannerAvailable) return
+        if (register) {
+            if (receiverRegistered) return
+            try {
+                val filter = IntentFilter()
+                val idBuf = intArrayOf(
+                    PropertyID.WEDGE_INTENT_ACTION_NAME,
+                    PropertyID.WEDGE_INTENT_DATA_STRING_TAG
+                )
+                val valueBuf = mScanManager.getParameterString(idBuf)
+                if (valueBuf != null && valueBuf[0] != null && valueBuf[0] != "") {
+                    filter.addAction(valueBuf[0])
+                } else {
+                    filter.addAction(Singleton.ACTION_DECODE)
+                }
+                filter.addAction(Singleton.ACTION_CAPTURE_IMAGE)
 
-            context.registerReceiver(scannerUrovoReceiver, filter)
-        } else if (mScanManager != null) {
-            Log.d("[TEST]", "registerReceiver 3");
-            mScanManager.stopDecode()
-            context.unregisterReceiver(scannerUrovoReceiver)
+                // Android 14+ (targetSdk 34) requires an explicit export flag for runtime receivers.
+                // Scan results come from the Urovo scanner service (another process), so EXPORTED.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    context.registerReceiver(scannerUrovoReceiver, filter, Context.RECEIVER_EXPORTED)
+                } else {
+                    context.registerReceiver(scannerUrovoReceiver, filter)
+                }
+                receiverRegistered = true
+            } catch (e: Throwable) {
+                Log.w("FlutterUrovoScan", "registerReceiver failed: $e")
+            }
+        } else {
+            try {
+                mScanManager.stopDecode()
+            } catch (e: Throwable) {
+                Log.w("FlutterUrovoScan", "stopDecode on detach failed: $e")
+            }
+            if (receiverRegistered) {
+                try {
+                    context.unregisterReceiver(scannerUrovoReceiver)
+                } catch (e: IllegalArgumentException) {
+                    // Not registered; nothing to do.
+                }
+                receiverRegistered = false
+            }
         }
     }
 }

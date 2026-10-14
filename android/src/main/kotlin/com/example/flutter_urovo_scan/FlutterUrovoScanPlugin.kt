@@ -84,8 +84,9 @@ class FlutterUrovoScanPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     Log.d("[TEST]", "FlutterUrovoScanPlugin: onDetachedFromEngine")
-    channel.setMethodCallHandler(null)
-    scannerHelper.registerReceiver(false)
+    if (::channel.isInitialized) channel.setMethodCallHandler(null)
+    // Must never throw: this runs while the host activity is being destroyed.
+    if (::scannerHelper.isInitialized) scannerHelper.registerReceiver(false)
     eventSink = null
   }
 
