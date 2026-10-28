@@ -27,7 +27,7 @@ class FlutterUrovoScanPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var scannerHelper: ScannerManagerHelper
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    Log.d("[TEST]", "FlutterUrovoScanPlugin: onAttachedToEngine")
+    Log.d("FlutterUrovoScan", "FlutterUrovoScanPlugin: onAttachedToEngine")
     context = flutterPluginBinding.applicationContext
     scannerHelper = ScannerManagerHelper(context, this)
     helperUtil = HelperUtil(context)
@@ -41,12 +41,12 @@ class FlutterUrovoScanPlugin: FlutterPlugin, MethodCallHandler {
       object : EventChannel.StreamHandler {
         override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
           eventSink = events
-          Log.d("[TEST]", "EventChannel: Listening for scan events: ${eventSink.toString()}")
+          Log.d("FlutterUrovoScan", "EventChannel: Listening for scan events: ${eventSink.toString()}")
         }
 
         override fun onCancel(arguments: Any?) {
           eventSink = null
-          Log.d("[TEST]", "EventChannel: Cancelled")
+          Log.d("FlutterUrovoScan", "EventChannel: Cancelled")
         }
       }
     )
@@ -56,7 +56,7 @@ class FlutterUrovoScanPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
-    Log.d("[TEST]", "FlutterUrovoScanPlugin: onMethodCall")
+    Log.d("FlutterUrovoScan", "FlutterUrovoScanPlugin: onMethodCall")
     when (call.method) {
       "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
       "getBatteryLevel" -> helperUtil.handleBatteryLevel(result)
@@ -83,7 +83,7 @@ class FlutterUrovoScanPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-    Log.d("[TEST]", "FlutterUrovoScanPlugin: onDetachedFromEngine")
+    Log.d("FlutterUrovoScan", "FlutterUrovoScanPlugin: onDetachedFromEngine")
     if (::channel.isInitialized) channel.setMethodCallHandler(null)
     // Must never throw: this runs while the host activity is being destroyed.
     if (::scannerHelper.isInitialized) scannerHelper.registerReceiver(false)
@@ -92,6 +92,6 @@ class FlutterUrovoScanPlugin: FlutterPlugin, MethodCallHandler {
 
   fun sendScanResultToFlutter(result: String) {
     eventSink?.success(result)
-    Log.d("[TEST]", "sendScanResultToFlutter: $result")
+    Log.d("FlutterUrovoScan", "sendScanResultToFlutter: $result")
   }
 }
