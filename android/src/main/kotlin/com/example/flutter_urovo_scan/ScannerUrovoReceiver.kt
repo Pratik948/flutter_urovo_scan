@@ -9,11 +9,11 @@ import android.util.Log
 class ScannerUrovoReceiver(private val plugin: FlutterUrovoScanPlugin?) : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.action
-        Log.d("[TEST]", "onReceive: action: $action")
+        Log.d("FlutterUrovoScan", "onReceive: action: $action")
 
         // Get Scan Image . Make sure to make a request before getting a scanned image
         if (Singleton.ACTION_CAPTURE_IMAGE == action) {
-            Log.d("[TEST]", "onReceive: ACTION_CAPTURE_IMAGE");
+            Log.d("FlutterUrovoScan", "onReceive: ACTION_CAPTURE_IMAGE");
             val imageData =
                 intent.getByteArrayExtra(Singleton.DECODE_CAPTURE_IMAGE_KEY)
             if (imageData != null && imageData.isNotEmpty()) {
@@ -22,29 +22,29 @@ class ScannerUrovoReceiver(private val plugin: FlutterUrovoScanPlugin?) : Broadc
 //                        mHandler.obtainMessage(MSG_SHOW_SCAN_IMAGE)
 //                    msg.obj = bitmap
 //                    mHandler.sendMessage(msg)
-                Log.d("[TEST]", "onReceive: imagedata bitmap:$bitmap")
+                Log.d("FlutterUrovoScan", "onReceive: imagedata bitmap:$bitmap")
                 plugin?.sendScanResultToFlutter("TEST IMAGE")
             } else {
-                Log.d("[TEST]", "onReceive: ignore imageData:$imageData")
+                Log.d("FlutterUrovoScan", "onReceive: ignore imageData:$imageData")
             }
         } else {
-            Log.d("[TEST]", "onReceive: ELSE");
+            Log.d("FlutterUrovoScan", "onReceive: ELSE");
 //                result = HashMap<String, Any>()
             // Get scan results, including string and byte data etc.
             val barcode = intent?.getByteArrayExtra(Singleton.DECODE_DATA_TAG)
             val barcodeLen = intent?.getIntExtra(Singleton.BARCODE_LENGTH_TAG, 0)
             val temp = intent?.getByteExtra(Singleton.BARCODE_TYPE_TAG, 0.toByte())
             val barcodeStr = intent?.getStringExtra(Singleton.BARCODE_STRING_TAG)
-            Log.d("[TEST]", "onReceive: temp: $temp");
+            Log.d("FlutterUrovoScan", "onReceive: temp: $temp");
             val scanResult = String(barcode!!, 0, barcodeLen ?: 0)
-            Log.d("[TEST]", "FlutterUrovoScanPlugin onReceive: scanResult/barcode: $scanResult")
-            Log.d("[TEST]", "onReceive: length: $barcodeLen")
-            Log.d("[TEST]", "onReceive: bytesToHexString: ${bytesToHexString(barcode)}")
-            Log.d("[TEST]", "onReceive: barcodeStr: $barcodeStr")
+            Log.d("FlutterUrovoScan", "FlutterUrovoScanPlugin onReceive: scanResult/barcode: $scanResult")
+            Log.d("FlutterUrovoScan", "onReceive: length: $barcodeLen")
+            Log.d("FlutterUrovoScan", "onReceive: bytesToHexString: ${bytesToHexString(barcode)}")
+            Log.d("FlutterUrovoScan", "onReceive: barcodeStr: $barcodeStr")
 
             // Send scan result to Flutter
             plugin?.sendScanResultToFlutter(scanResult)
-            Log.d("[TEST]", "FlutterUrovoScanPlugin eventSink?.success(scanResult): $scanResult")
+            Log.d("FlutterUrovoScan", "FlutterUrovoScanPlugin eventSink?.success(scanResult): $scanResult")
         }
     }
 

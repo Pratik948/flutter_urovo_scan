@@ -20,7 +20,7 @@ class HelperUtil(private val context: Context) {
 
     // Function to handle getting battery level
      fun handleBatteryLevel(result: MethodChannel.Result) {
-        Log.d("[TEST]", "handleBatteryLevel: WORKING!");
+        Log.d("FlutterUrovoScan", "handleBatteryLevel: WORKING!");
         val batteryLevel = getBatteryLevel()
 
 
